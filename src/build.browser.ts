@@ -1,15 +1,9 @@
 import type { PlistValue } from './parse.browser.js';
-
-/**
- * Encode a Uint8Array into a base64 string.
- */
-function uint8ArrayToBase64(bytes: Uint8Array): string {
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary);
-}
+import {
+  escapeXmlText,
+  plistDateText,
+  uint8ArrayToBase64,
+} from './xml-serialize.js';
 
 export interface BuildOptions {
   pretty?: boolean;
@@ -80,7 +74,7 @@ export function build(obj: PlistValue, opts?: BuildOptions): string {
     } else if (value instanceof Date) {
       emit(
         depth,
-        '<date>' + new Date(value).toISOString().replace(/\.\d{3}Z$/, 'Z') + '</date>',
+        '<date>' + plistDateText(new Date(value)) + '</date>',
       );
     } else if (typeof value === 'boolean') {
       emit(depth, value ? '<true/>' : '<false/>');
@@ -105,9 +99,6 @@ export function build(obj: PlistValue, opts?: BuildOptions): string {
   return parts.join(sep);
 }
 
-function escapeXml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
+// Escaping is provided by the shared `xml-serialize` module so local
+// lossless edits and full browser builds escape text identically.
+const escapeXml = escapeXmlText;
