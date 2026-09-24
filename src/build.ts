@@ -1,5 +1,5 @@
 import xmlbuilder from 'xmlbuilder';
-import type { PlistValue } from './parse.js';
+import type { PlistValue } from './xml-walk.js';
 
 /**
  * Encode a Uint8Array into a base64 string.

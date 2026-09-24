@@ -1,4 +1,4 @@
-import type { PlistValue } from './parse.js';
+import type { PlistValue } from './xml-walk.js';
 
 const EPOCH_2001 = 978307200000; // ms between 1970-01-01 and 2001-01-01
 

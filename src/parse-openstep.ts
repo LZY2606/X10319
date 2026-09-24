@@ -1,4 +1,4 @@
-import type { PlistValue } from './parse.js';
+import type { PlistValue } from './xml-walk.js';
 
 class OpenStepParser {
   input: string;
