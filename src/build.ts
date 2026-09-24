@@ -52,6 +52,23 @@ export function build(obj: PlistValue, opts?: BuildOptions): string {
 }
 
 /**
+ * Serialize a single plist value into an XML fragment (no `<?xml?>` header
+ * and no `<plist>` wrapper). Shares the exact same `walk_obj` traversal as
+ * `build()`, so fragments are spelled exactly the way `build()` would spell
+ * the value inside a document. Used by the lossless edit-plan API.
+ *
+ * Returns an empty string for values that `build()` would also omit
+ * (e.g. `undefined` / `null`).
+ */
+export function buildFragment(value: PlistValue): string {
+  const holder = xmlbuilder.create('plist', { headless: true });
+  walk_obj(value, holder);
+  const out = holder.end({ pretty: false });
+  if (out === '<plist/>') return '';
+  return out.slice('<plist>'.length, out.length - '</plist>'.length);
+}
+
+/**
  * depth first, recursive traversal of a javascript object. when complete,
  * next_child contains a reference to the build XML object.
  */
