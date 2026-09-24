@@ -180,6 +180,43 @@ Parse an OpenStep/ASCII plist.
 - **input**: `string`
 - **returns**: `PlistValue`
 
+### `parseLossless(xml)`
+
+Parse an XML plist without discarding source information. The semantic
+`value` is produced by the same production code path as `parse()`, while the
+document additionally records exact source spans for every node, comments,
+processing instructions, whitespace runs, dict key order (duplicate keys are
+kept separately) and the raw scalar spelling (entities, base64 line breaks,
+leading zeros). The returned document is frozen and carries a content
+`digest`.
+
+- **xml**: `string`
+- **returns**: `LosslessPlistDocument` — throws `LosslessPlistError` (an
+  `Error` subclass) with a stable `code` and first-violation `offset` for
+  malformed or unsupported XML
+
+Related helpers: `findNode(doc, path)`, `dictEntries(doc, node)`,
+`elementChildren(node)`, `innerText(doc, node)`, `sliceSource(doc, span)`,
+`decodeEntities(text)`, `digestSource(source)`.
+
+### `createEditPlan(doc, edits)` / `applyEditPlan(plan, source)`
+
+Create and apply local edit plans. A plan is pure frozen data (it never
+writes files) and is bound to the source digest: applying it to a changed
+source fails atomically with a `DIGEST_MISMATCH` error. Bytes outside the
+edited spans are preserved exactly. Edits are validated and sorted by
+position, so plan output does not depend on enumeration order.
+
+```ts
+const doc = parseLossless(xml);
+const name = findNode(doc, ['name']);
+const plan = createEditPlan(doc, [
+  { ...name.span, replacement: '<string>new value</string>' },
+]);
+const next = applyEditPlan(plan, xml); // digest-checked
+parse(next).name; // 'new value'
+```
+
 ### `build(obj, opts?)`
 
 Build an XML plist string.
